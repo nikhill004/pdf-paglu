@@ -65,6 +65,28 @@ function ToolModal({ tool, onClose }) {
     return getApiUrl(endpoints[tool.id]);
   }
 
+  async function handleDownload(downloadUrl) {
+    try {
+      const fullUrl = getApiUrl(downloadUrl);
+      const response = await axios.get(fullUrl, {
+        responseType: 'blob'
+      });
+      
+      // Create blob link to download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `pdf-paglu-${Date.now()}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('Download failed. Please try again.');
+    }
+  }
+
   function renderOptions() {
     if (tool.id === 'split') {
       return (
@@ -163,13 +185,12 @@ function ToolModal({ tool, onClose }) {
               ) : (
                 <div>
                   <p className="font-semibold mb-2">Success!</p>
-                  <a
-                    href={getApiUrl(result.downloadUrl)}
-                    download
+                  <button
+                    onClick={() => handleDownload(result.downloadUrl)}
                     className="inline-block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
                   >
                     Download File
-                  </a>
+                  </button>
                   {result.reduction && (
                     <p className="mt-2 text-sm">Size reduced by {result.reduction}</p>
                   )}
