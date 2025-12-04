@@ -1,0 +1,29 @@
+services:
+  # Backend API
+  - type: web
+    name: pdf-paglu-api
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+
+  # Frontend
+  - type: web
+    name: pdf-paglu-frontend
+    env: static
+    region: oregon
+    plan: free
+    buildCommand: cd client && npm install && npm run build
+    staticPublishPath: ./client/dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: pdf-paglu-api
+          envVarKey: RENDER_EXTERNAL_URL
